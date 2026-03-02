@@ -90,7 +90,7 @@ services:
 
 1. To stop all running [services](#service) and remove [containers](./docker.md#container),
 
-   [run in the `VS Code Terminal`](../../wiki/vs-code.md#run-a-command-in-the-vs-code-terminal):
+   [run in the `VS Code Terminal`](./vs-code.md#run-a-command-in-the-vs-code-terminal):
 
    ```terminal
    docker compose --env-file .env.docker.secret down
@@ -100,7 +100,7 @@ services:
 
 1. To stop all running [services](#service), remove [containers](./docker.md#container), and remove [volumes](#volume),
 
-   [run in the `VS Code Terminal`](../../wiki/vs-code.md#run-a-command-in-the-vs-code-terminal):
+   [run in the `VS Code Terminal`](./vs-code.md#run-a-command-in-the-vs-code-terminal):
 
    ```terminal
    docker compose --env-file .env.docker.secret down -v

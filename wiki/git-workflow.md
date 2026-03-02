@@ -39,7 +39,7 @@ Outline:
 
 ## Switch to the `main` branch
 
-[Switch to the `main` branch](./git-vscode.md#switch-to-the-branch-branch) in `VS Code`.
+[Switch to the `main` branch](./git-vscode.md#switch-to-the-branch) in `VS Code`.
 
 ## Detect conflicts
 
@@ -47,7 +47,7 @@ Outline:
 
 ## Pull changes from `origin/main`
 
-[Pull changes from the `main` branch in your fork on `GitHub`](./git-vscode.md#pull-changes-from-remotebranch).
+[Pull changes from the `main` branch in your fork on `GitHub`](./git-vscode.md#pull-changes-from-the-branch-on-remote).
 
 ## Pull changes from `origin/main` and rebase
 
@@ -57,7 +57,7 @@ Rebasing places your local commits on top of the commits from `origin/main`. Con
 
 Complete the following steps:
 
-1. [Pull and rebase from `origin/main`](./git-vscode.md#pull-changes-from-remotebranch-and-rebase).
+1. [Pull and rebase from `origin/main`](./git-vscode.md#pull-changes-from-branch-on-remote-and-rebase).
 2. If conflicts occur, [resolve them](./git-vscode.md#resolve-a-merge-conflict).
 
 <!-- TODO pull from upstream -->

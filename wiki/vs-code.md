@@ -773,7 +773,7 @@ Steps:
    **Note:** [`Ubuntu`](./linux.md#ubuntu) is a [`Linux` distro](./linux.md#ubuntu).
 
 4. Open [`VS Code`](#what-is-vs-code).
-5. [Install the extension](./vs-code.md#install-the-extension) with the identifier `ms-vscode-remote.remote-wsl`.
+5. [Install the extension](./vs-code.md#install-the-vs-code-extension) with the identifier `ms-vscode-remote.remote-wsl`.
 
    This extension lets you use `VS Code` in [`WSL`](./operating-system.md#wsl).
 
