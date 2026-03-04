@@ -26,8 +26,8 @@ Outline:
 - [Create a PR to the `main` branch in your fork](#create-a-pr-to-the-main-branch-in-your-fork)
 - [Get a PR review](#get-a-pr-review)
   - [PR review rules](#pr-review-rules)
-    - [As a PR reviewer](#as-a-pr-reviewer)
-    - [As a PR author](#as-a-pr-author)
+    - [PR review rules for the reviewer](#pr-review-rules-for-the-reviewer)
+    - [PR review rules for the author](#pr-review-rules-for-the-author)
 - [Merge the PR](#merge-the-pr)
 - [Clean up](#clean-up)
 
@@ -85,21 +85,28 @@ Alternatively, the name of that branch (without `<` and `>`).
 
 ## Get a PR review
 
-[Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review#requesting-reviews-from-collaborators-and-organization-members) a review of the PR from the collaborator (see [PR review rules](#pr-review-rules)).
+1. [Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/requesting-a-pull-request-review#requesting-reviews-from-collaborators-and-organization-members) a review of the PR from the collaborator.
 
-Get the collaborator's comments and address them, e.g., make fixes or ask to clarify the comment.
+2. Conduct the PR review together following the [PR review rules](#pr-review-rules).
 
-Get the collaborator to approve the PR.
+3. Get the collaborator to approve the PR.
 
 ### PR review rules
 
-#### As a PR reviewer
+- [PR review rules for the reviewer](#pr-review-rules-for-the-reviewer)
+- [PR review rules for the author](#pr-review-rules-for-the-author)
 
-1. Check the task's **Acceptance criteria**.
-2. Leave at least one [comment](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#adding-comments-to-a-pull-request) — point out problems or confirm that items look good.
-3. [Approve](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request#submitting-your-review) the PR when all relevant acceptance criteria are met.
+#### PR review rules for the reviewer
 
-#### As a PR author
+As a reviewer:
+
+- Check the task's **Acceptance criteria**.
+- Leave at least one [comment](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#adding-comments-to-a-pull-request) — point out problems or confirm that items look good.
+- [Approve](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request#submitting-your-review) the PR when all relevant acceptance criteria are met.
+
+#### PR review rules for the author
+
+As a PR author:
 
 - Address reviewer comments (fix issues or explain your reasoning).
 - Reply to comments, e.g., "Fixed in d0d5aeb".
@@ -108,11 +115,8 @@ Get the collaborator to approve the PR.
 
 Click `Merge pull request`.
 
-<!-- What should you see? -->
-<!-- make prs in your fork should be not ok -->
-
 ## Clean up
 
-Close the issue.
+1. Close the issue.
 
-Delete the PR branch.
+2. Delete the PR branch ([`<task-branch>`](#task-branch)).
