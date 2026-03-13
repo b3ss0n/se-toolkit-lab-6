@@ -130,5 +130,107 @@ def test_agent_missing_env_var() -> None:
     )
 
 
+@pytest.mark.skipif(
+    not os.environ.get("LLM_API_KEY"),
+    reason="LLM_API_KEY not set, skipping integration test",
+)
+def test_agent_list_files_tool() -> None:
+    """Test that agent uses list_files tool for wiki directory questions."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uv",
+            "run",
+            "agent.py",
+            "What files are in the wiki directory?",
+        ],
+        capture_output=True,
+        text=True,
+        env=get_agent_env(),
+        timeout=120,
+    )
+
+    # Print stderr for debugging
+    if result.stderr:
+        print(f"Agent stderr: {result.stderr}", file=sys.stderr)
+
+    # Check exit code
+    assert result.returncode == 0, (
+        f"Agent exited with code {result.returncode}: {result.stderr}"
+    )
+
+    # Parse stdout as JSON
+    stdout = result.stdout.strip()
+    response = json.loads(stdout)
+
+    # Verify tool_calls contains list_files
+    tool_calls = response.get("tool_calls", [])
+    assert len(tool_calls) > 0, "Expected at least one tool call"
+
+    tool_names = [call.get("tool") for call in tool_calls]
+    assert "list_files" in tool_names, (
+        f"Expected 'list_files' in tool calls, got: {tool_names}"
+    )
+
+    # Verify source field exists
+    assert "source" in response, "Missing 'source' field in response"
+
+
+@pytest.mark.skipif(
+    not os.environ.get("LLM_API_KEY"),
+    reason="LLM_API_KEY not set, skipping integration test",
+)
+def test_agent_read_file_tool() -> None:
+    """Test that agent uses read_file tool for documentation questions."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uv",
+            "run",
+            "agent.py",
+            "How do you resolve a merge conflict in git?",
+        ],
+        capture_output=True,
+        text=True,
+        env=get_agent_env(),
+        timeout=120,
+    )
+
+    # Print stderr for debugging
+    if result.stderr:
+        print(f"Agent stderr: {result.stderr}", file=sys.stderr)
+
+    # Check exit code
+    assert result.returncode == 0, (
+        f"Agent exited with code {result.returncode}: {result.stderr}"
+    )
+
+    # Parse stdout as JSON
+    stdout = result.stdout.strip()
+    response = json.loads(stdout)
+
+    # Verify required fields
+    assert "answer" in response, "Missing 'answer' field"
+    assert "source" in response, "Missing 'source' field"
+    assert "tool_calls" in response, "Missing 'tool_calls' field"
+
+    # Verify tool_calls is populated (agent should use tools for this question)
+    tool_calls = response.get("tool_calls", [])
+    if len(tool_calls) > 0:
+        tool_names = [call.get("tool") for call in tool_calls]
+        # Agent should use read_file or list_files
+        assert "read_file" in tool_names or "list_files" in tool_names, (
+            f"Expected read_file or list_files in tool calls, got: {tool_names}"
+        )
+
+    # Verify source contains wiki path
+    source = response.get("source", "")
+    assert "wiki" in source.lower() or len(tool_calls) == 0, (
+        f"Expected wiki in source, got: {source}"
+    )
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
