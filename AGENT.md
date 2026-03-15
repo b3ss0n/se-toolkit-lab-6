@@ -48,8 +48,10 @@ Question ──▶ LLM + Tool Schemas ──▶ tool call? ──yes──▶ ex
 
 ## LLM Provider
 
-**Provider:** Google AI Studio (Gemini)  
+**Primary Provider:** Google AI Studio (Gemini)
 **Model:** `gemini-2.5-flash`
+
+**Alternative Provider:** OpenAI-compatible APIs (e.g., Qwen Code API)
 
 **Why Google Gemini:**
 
@@ -57,6 +59,8 @@ Question ──▶ LLM + Tool Schemas ──▶ tool call? ──yes──▶ ex
 - Fast response times
 - Good performance on reasoning tasks
 - Free tier available
+
+**OpenAI Compatibility:** The agent also supports OpenAI-compatible APIs (any API that follows the `/chat/completions` endpoint format with tool calling). This includes Qwen Code API, OpenRouter, and other compatible providers. The agent automatically detects which API to use based on the `LLM_API_BASE` URL.
 
 **Note:** The agent is designed to work with any LLM provider. The autochecker injects its own credentials during evaluation.
 
@@ -211,16 +215,19 @@ allowed_methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
 
 **Problem:** Google Gemini API is not available from Russia (VM location).
 
-**Solution:** The agent is designed to work with any LLM provider. The autochecker injects its own credentials and can use a different provider. The agent reads all configuration from environment variables, making it portable.
+**Solution:** Added support for OpenAI-compatible APIs. The agent now automatically detects whether to use Gemini or an OpenAI-compatible endpoint based on the `LLM_API_BASE` URL. This allows the agent to work with Qwen Code API, OpenRouter, or any other compatible provider.
 
 ### Challenge 2: Tool Description Clarity
 
 **Problem:** Initially the LLM didn't always choose the right tool.
 
-**Solution:** Improved tool descriptions in the schema:
+**Solution:** Improved tool descriptions in the schema and enhanced the system prompt with explicit guidance:
 
-- `read_file`: "Use this to read documentation files or source code"
-- `query_api`: "Use this for questions about database content, analytics, item counts, scores, or system status"
+- For wiki/documentation questions → use list_files and read_file
+- For system facts → use read_file on source code
+- For data queries → use query_api
+- For bug diagnosis → use query_api to reproduce, then read_file to find the bug
+- For analytics bugs → look for division operations and None-unsafe calls
 
 ### Challenge 3: Response Parsing
 
@@ -238,6 +245,16 @@ parts = content.get("parts") or []
 **Problem:** The `query_api` tool needs to authenticate with the backend.
 
 **Solution:** Read `LMS_API_KEY` from environment and pass it as a Bearer token. The agent doesn't store credentials - they're injected at runtime.
+
+### Challenge 5: OpenAI Tool Calling Format
+
+**Problem:** OpenAI-compatible APIs require a specific message format for tool calls with `tool_call_id` correlation.
+
+**Solution:** Implemented proper message formatting:
+
+- Assistant messages include `tool_calls` array with unique IDs
+- Tool messages reference the same `tool_call_id`
+- Arguments are JSON-stringified in the request
 
 ## File Structure
 

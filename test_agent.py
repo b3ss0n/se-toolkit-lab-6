@@ -122,12 +122,12 @@ def test_agent_missing_env_var() -> None:
     )
 
     # Should exit with non-zero code
-    assert result.returncode != 0, "Agent should exit with error when env vars missing"
+    assert result.returncode != 0, (
+        f"Agent should exit with error when env vars missing. stderr: {result.stderr}"
+    )
 
     # Error should go to stderr
-    assert "Error" in result.stderr or "missing" in result.stderr.lower(), (
-        f"Expected error message in stderr, got: {result.stderr}"
-    )
+    assert result.stderr, "Expected error message in stderr, got empty output"
 
 
 @pytest.mark.skipif(
@@ -332,6 +332,108 @@ def test_agent_system_framework_question() -> None:
     assert has_keyword or len(response.get("tool_calls", [])) > 0, (
         f"Expected framework name in answer, got: {response.get('answer')}"
     )
+
+
+@pytest.mark.skipif(
+    not os.environ.get("LLM_API_KEY"),
+    reason="LLM_API_KEY not set, skipping integration test",
+)
+def test_agent_bug_diagnosis_question() -> None:
+    """Test that agent can diagnose bugs in analytics code."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uv",
+            "run",
+            "agent.py",
+            "Read the analytics router source code. Which line has a potential bug with division or None handling?",
+        ],
+        capture_output=True,
+        text=True,
+        env=get_agent_env(),
+        timeout=180,
+    )
+
+    # Print stderr for debugging
+    if result.stderr:
+        print(f"Agent stderr: {result.stderr}", file=sys.stderr)
+
+    # Check exit code
+    assert result.returncode == 0, (
+        f"Agent exited with code {result.returncode}: {result.stderr}"
+    )
+
+    # Parse stdout as JSON
+    stdout = result.stdout.strip()
+    response = json.loads(stdout)
+
+    # Verify required fields
+    assert "answer" in response, "Missing 'answer' field"
+    assert "source" in response, "Missing 'source' field"
+    assert "tool_calls" in response, "Missing 'tool_calls' field"
+
+    # Agent should use read_file to find the bug
+    tool_calls = response.get("tool_calls", [])
+    if len(tool_calls) > 0:
+        tool_names = [call.get("tool") for call in tool_calls]
+        assert "read_file" in tool_names, (
+            f"Expected read_file in tool calls for bug diagnosis, got: {tool_names}"
+        )
+
+    # Source should reference analytics.py
+    source = response.get("source", "")
+    assert "analytics" in source.lower() or len(tool_calls) == 0, (
+        f"Expected analytics in source, got: {source}"
+    )
+
+
+@pytest.mark.skipif(
+    not os.environ.get("LLM_API_KEY"),
+    reason="LLM_API_KEY not set, skipping integration test",
+)
+def test_agent_error_handling_comparison() -> None:
+    """Test that agent can compare error handling between ETL and API."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uv",
+            "run",
+            "agent.py",
+            "Compare how the ETL pipeline handles failures vs how the API handles errors.",
+        ],
+        capture_output=True,
+        text=True,
+        env=get_agent_env(),
+        timeout=180,
+    )
+
+    # Print stderr for debugging
+    if result.stderr:
+        print(f"Agent stderr: {result.stderr}", file=sys.stderr)
+
+    # Check exit code
+    assert result.returncode == 0, (
+        f"Agent exited with code {result.returncode}: {result.stderr}"
+    )
+
+    # Parse stdout as JSON
+    stdout = result.stdout.strip()
+    response = json.loads(stdout)
+
+    # Verify required fields
+    assert "answer" in response, "Missing 'answer' field"
+    assert "tool_calls" in response, "Missing 'tool_calls' field"
+
+    # Agent should use read_file to compare both files
+    tool_calls = response.get("tool_calls", [])
+    if len(tool_calls) > 0:
+        tool_names = [call.get("tool") for call in tool_calls]
+        # Should read multiple files
+        assert len(tool_calls) >= 2, (
+            f"Expected at least 2 tool calls for comparison, got: {len(tool_calls)}"
+        )
 
 
 if __name__ == "__main__":

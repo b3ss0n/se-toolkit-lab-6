@@ -143,7 +143,8 @@ uv run run_eval.py
 | API returns 404 | Wrong path | Read API documentation, check endpoint |
 | Agent times out | Too many tool calls | Reduce max iterations, optimize prompts |
 | Answer close but wrong | Phrasing doesn't match expected keywords | Adjust system prompt for precision |
-| Gemini API unavailable | Location restrictions | Agent reads config from env, autochecker injects working credentials |
+| Gemini API unavailable | Location restrictions | Use OpenAI-compatible API (Qwen, OpenRouter) |
+| OpenAI API connection refused | Local API not running | Autochecker injects working credentials |
 
 ### Iteration Process
 
@@ -157,15 +158,30 @@ uv run run_eval.py
 4. Re-run eval
 5. Repeat until all pass
 
+### Implementation Notes
+
+**OpenAI Compatibility Added:** During implementation, I discovered that the Google Gemini API is not available from the VM location (Russia). I added support for OpenAI-compatible APIs by:
+
+1. Creating `call_llm_openai_with_tools()` function that follows the OpenAI chat completions format
+2. Properly formatting tool calls with `tool_call_id` correlation
+3. Auto-detecting which API to use based on the `LLM_API_BASE` URL
+
+**System Prompt Enhancements:** Added specific guidance for:
+
+- Bug diagnosis in analytics code (look for division operations, None-unsafe calls)
+- Comparing error handling between ETL and API routers
+- Being precise with line numbers and function names
+
+**Default Port Fix:** Changed the default `AGENT_API_BASE_URL` from `http://localhost:42001` to `http://localhost:42002` to match the Caddy proxy port in docker-compose.yml.
+
 ### Known Issues
 
-**Gemini API Location Restriction:** The Google Gemini API is not available from Russia (VM location). This affects local testing on the VM. However, the agent is designed to read all configuration from environment variables, so the autochecker can inject different credentials (e.g., OpenRouter, Qwen Code API) during evaluation.
+**Local Testing Limitation:** The Qwen Code API runs on the VM, not locally. Local testing requires either:
 
-**Testing Strategy:**
+1. Docker Desktop WSL integration enabled, or
+2. SSH tunnel to VM API
 
-- Test agent locally with exported credentials from a location where Gemini works
-- The autochecker will use its own LLM credentials that work from the VM
-- The agent's tool implementations are correct and work when the LLM calls them
+The autochecker will inject working credentials during evaluation.
 
 ## Files to Create/Update
 
