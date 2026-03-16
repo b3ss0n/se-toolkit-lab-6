@@ -95,13 +95,15 @@ We refer to your fork as `fork` and to the original repo as `upstream`.
 
 ### 1.3. Start the services locally
 
-1. Start the services in the background:
+1. (`Windows`/`macOS`) Make sure [Docker Desktop](../../wiki/docker.md#start-docker) is running.
+
+2. Start the services in the background:
 
    ```terminal
    docker compose --env-file .env.docker.secret up --build -d
    ```
 
-2. Check that the containers are running:
+3. Check that the containers are running:
 
    ```terminal
    docker compose --env-file .env.docker.secret ps --format "table {{.Service}}\t{{.Status}}"
@@ -117,45 +119,47 @@ We refer to your fork as `fork` and to the original repo as `upstream`.
    postgres   Up 55 seconds (healthy)
    ```
 
-   <details><summary><b>Troubleshooting (click to open)</b></summary>
-
-   <h4>Port conflict (<code>port is already allocated</code>)</h4>
-
-   Labs 5 and 6 use the same ports (42001, 42002, 42004). If you have Lab 5 containers running, stop them first:
-
-   ```terminal
-   cd ../se-toolkit-lab-5
-   docker compose --env-file .env.docker.secret down
-   cd ../se-toolkit-lab-6
-   ```
-
-   If that doesn't help, [clean up `Docker`](../../wiki/docker.md#clean-up-docker), then run the `docker compose up` command again.
-
-   <h4>Containers exit immediately</h4>
-
-   Rebuild all containers from scratch:
-
-   ```terminal
-   docker compose --env-file .env.docker.secret down -v
-   docker compose --env-file .env.docker.secret up --build -d
-   ```
-
-   <h4>DNS resolution errors (<code>getaddrinfo EAI_AGAIN</code>)</h4>
-
-   If you see DNS errors like `getaddrinfo EAI_AGAIN registry.npmjs.org`, Docker can't resolve domain names. This is a university network DNS issue. Add Google DNS to Docker:
-
-   ```terminal
-   sudo tee /etc/docker/daemon.json <<'EOF'
-   {
-     "dns": ["8.8.8.8", "8.8.4.4"]
-   }
-   EOF
-   sudo systemctl restart docker
-   ```
-
-   Then run the `docker compose up` command again.
-
-   </details>
+> <h3>Troubleshooting</h3>
+>
+> **Port conflict (`port is already allocated`).**
+>
+> Labs 5 and 6 use the same ports (42001, 42002, 42004). If you have Lab 5 containers running, stop them first:
+>
+> ```terminal
+> cd ../se-toolkit-lab-5
+> docker compose --env-file .env.docker.secret down
+> cd ../se-toolkit-lab-6
+> ```
+>
+> If that doesn't help, [clean up `Docker`](../../wiki/docker.md#clean-up-docker), then run the `docker compose up` command again.
+>
+> **Containers exit immediately.**
+>
+> Rebuild all containers from scratch:
+>
+> ```terminal
+> docker compose --env-file .env.docker.secret down -v
+> docker compose --env-file .env.docker.secret up --build -d
+> ```
+>
+> **Hangs at `=> [caddy builder 4/7] RUN npm install -g pnpm`**
+>
+> or
+>
+> **DNS resolution errors (`getaddrinfo EAI_AGAIN`).**
+>
+> If you see DNS errors like `getaddrinfo EAI_AGAIN registry.npmjs.org`, `Docker` can't resolve domain names. This is a university network DNS issue. Add Google DNS to `Docker`:
+>
+> ```terminal
+> sudo tee /etc/docker/daemon.json <<'EOF'
+> {
+>   "dns": ["8.8.8.8", "8.8.4.4"]
+> }
+> EOF
+> sudo systemctl restart docker
+> ```
+>
+> Then run the `docker compose up` command again.
 
 ### 1.4. Populate the database
 
@@ -198,7 +202,7 @@ The database starts empty. You need to run the ETL pipeline to populate it with 
 
 3. Switch to the **Dashboard** tab.
 
-   You should see charts with analytics data (score distribution, submissions timeline, group performance, task pass rates).
+   You should see charts with analytics data (submissions timeline, score distribution, group performance, task pass rates).
 
 > [!IMPORTANT]
 > If the dashboard shows no data or errors, make sure:
@@ -240,6 +244,10 @@ The autochecker tests your agent against your **deployed backend on your VM**. Y
    docker compose --env-file .env.docker.secret up --build -d
    ```
 
+   > <h3>Troubleshooting</h3>
+   >
+   > The same troubleshooting advices as when [starting the services locally](#13-start-the-services-locally).
+
 6. Populate the database:
 
    ```terminal
@@ -252,7 +260,7 @@ The autochecker tests your agent against your **deployed backend on your VM**. Y
 7. Verify the deployment:
 
    ```terminal
-   curl -s http://localhost:42002/items/ -H "Authorization: Bearer <your-LMS_API_KEY>" | head -c 200
+   curl -s http://localhost:42002/items/ -H "Authorization: Bearer <your-LMS_API_KEY>" | jq .
    ```
 
    You should see a JSON array of items.
@@ -264,7 +272,7 @@ The autochecker tests your agent against your **deployed backend on your VM**. Y
 
 Your agent needs an LLM to answer questions. [Qwen Code](../../wiki/qwen.md#what-is-qwen-code) provides **1000 free requests per day** and works from Russia — no VPN or credit card needed.
 
-1. [Set up the Qwen Code API on your VM](../../wiki/qwen.md#set-up-the-qwen-code-api-remote-machine).
+1. [Set up the Qwen Code API on your VM](../../wiki/qwen-code-api.md#set-up-the-qwen-code-api-remote).
 
    After completing the setup, you will have the Qwen API running on your VM at `http://localhost:<qwen-api-port>/v1`.
 
@@ -291,7 +299,7 @@ Your agent needs an LLM to answer questions. [Qwen Code](../../wiki/qwen.md#what
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer <your-QWEN_API_KEY>" \
      -d '{"model":"qwen3-coder-plus","messages":[{"role":"user","content":"What is 2+2?"}]}' \
-     | python -m json.tool
+     | jq .
    ```
 
 <details><summary><b>Alternative: OpenRouter (click to open)</b></summary>

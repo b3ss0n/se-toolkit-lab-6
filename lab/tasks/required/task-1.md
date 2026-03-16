@@ -6,8 +6,25 @@ Build a CLI that connects to an LLM and answers questions. This is the foundatio
 
 A `Python` CLI program (`agent.py`) that takes a question, sends it to an LLM, and returns a structured JSON answer. No tools or agentic loop yet — just the basic plumbing: parse input, call the LLM, format output. You will add tools and the agentic loop in Tasks 2–3.
 
-```
-User question → agent.py → LLM API → JSON answer
+```mermaid
+sequenceDiagram
+    box Local machine
+        participant User
+        participant agent.py
+    end
+    box VM
+        participant Proxy as qwen-code-oai-proxy
+    end
+    box Qwen Cloud
+        participant LLM as Qwen 3 Coder
+    end
+
+    User->>agent.py: CLI arg (question)
+    agent.py->>Proxy: POST /v1/chat/completions
+    Proxy->>LLM: proxy request
+    LLM-->>Proxy: response
+    Proxy-->>agent.py: response
+    agent.py-->>User: stdout {answer, tool_calls}
 ```
 
 **Input** — a question as the first command-line argument:
@@ -34,29 +51,32 @@ uv run agent.py "What does REST stand for?"
 
 Your agent needs an LLM that supports the OpenAI-compatible chat completions API. You are free to use any provider.
 
-**Recommended: [Qwen Code API](../../wiki/qwen.md#set-up-the-qwen-code-api-remote-machine)**
+**Recommended: [Set up the Qwen Code API on your VM](../../../wiki/qwen-code-api.md#set-up-the-qwen-code-api-remote)**
 
-[Qwen Code](../../wiki/qwen.md#what-is-qwen-code) provides **1000 free requests per day**, works from Russia, and requires no credit card. Follow the [setup instructions](../setup-simple.md#17-set-up-llm-access-qwen-code-api) to deploy it on your VM.
+[Qwen Code](../../../wiki/qwen.md#what-is-qwen-code) provides **1000 free requests per day**, works from Russia, and requires no credit card.
 
-| Model | Tool calling | Notes |
-|-------|-------------|-------|
-| `qwen3-coder-plus` | Strong | Recommended, default in `.env.agent.example` |
-| `coder-model` | Strong | Qwen 3.5 Plus |
+Follow the [setup instructions](../setup-simple.md#17-set-up-llm-access-qwen-code-api) to deploy it on your VM.
+
+| Model              | Tool calling | Notes                                        |
+| ------------------ | ------------ | -------------------------------------------- |
+| `qwen3-coder-plus` | Strong       | Recommended, default in `.env.agent.example` |
+| `coder-model`      | Strong       | Qwen 3.5 Plus                                |
 
 <details><summary><b>Alternative: OpenRouter (click to open)</b></summary>
 
 [OpenRouter](https://openrouter.ai) offers free models with no credit card required.
 
-| Model | Tool calling | Notes |
-|-------|-------------|-------|
-| `meta-llama/llama-3.3-70b-instruct:free` | Strong | Good alternative |
-| `qwen/qwen3-coder:free` | Good | Alternative |
+| Model                                    | Tool calling | Notes            |
+| ---------------------------------------- | ------------ | ---------------- |
+| `meta-llama/llama-3.3-70b-instruct:free` | Strong       | Good alternative |
+| `qwen/qwen3-coder:free`                  | Good         | Alternative      |
 
 > [!WARNING]
 > **OpenRouter free-tier limitations:**
+>
 > - Free models have a **50 requests per day** limit per account.
 > - Free models can be **temporarily unavailable** due to upstream provider load (`429` errors).
-> - The autochecker runs 20 questions against your agent — free-tier rate limits may cause failures.
+> - The autochecker runs 10 questions against your agent — free-tier rate limits may cause failures.
 > - If you use OpenRouter, plan your testing carefully: use `run_eval.py --index N` to test one question at a time.
 
 </details>

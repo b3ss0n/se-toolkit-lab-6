@@ -29,18 +29,18 @@
     - [1.10.1. Install `Node.js`](#1101-install-nodejs)
     - [1.10.2. (UPD) Install `pnpm`](#1102-upd-install-pnpm)
   - [1.11. (UPD) Set up the `Qwen Code` (LOCAL)](#111-upd-set-up-the-qwen-code-local)
-  - [1.12. (UPD) Set up the `Qwen` API (VM)](#112-upd-set-up-the-qwen-api-vm)
+  - [1.12. (UPD) Set up the `Qwen Code` API (VM)](#112-upd-set-up-the-qwen-code-api-vm)
   - [1.13. Set up the `Autochecker` bot (`Telegram`)](#113-set-up-the-autochecker-bot-telegram)
   - [1.14. Check the setup using the `Autochecker` bot (`Telegram`)](#114-check-the-setup-using-the-autochecker-bot-telegram)
 - [2. Optional steps](#2-optional-steps)
   - [2.1. (UPD) Set up `Nix` (LOCAL)](#21-upd-set-up-nix-local)
   - [2.2. (UPD) Set up `direnv` (LOCAL)](#22-upd-set-up-direnv-local)
-  - [2.3. Learn to go back after clicking a link](#23-learn-to-go-back-after-clicking-a-link)
-  - [2.4. Set up the shell prompt](#24-set-up-the-shell-prompt)
-  - [2.5. Customize the `Source Control`](#25-customize-the-source-control)
-  - [2.6. Get familiar with `GitLens`](#26-get-familiar-with-gitlens)
-  - [2.7. Create a label for tasks](#27-create-a-label-for-tasks)
-  - [2.8. View `Markdown` files in `VS Code`](#28-view-markdown-files-in-vs-code)
+  - [2.3. Learn to go back after clicking a link (LOCAL)](#23-learn-to-go-back-after-clicking-a-link-local)
+  - [2.4. Set up the shell prompt (LOCAL)](#24-set-up-the-shell-prompt-local)
+  - [2.5. Customize the `Source Control` (LOCAL)](#25-customize-the-source-control-local)
+  - [2.6. Get familiar with `GitLens` (LOCAL)](#26-get-familiar-with-gitlens-local)
+  - [2.7. Create a label for tasks (`GitHub`)](#27-create-a-label-for-tasks-github)
+  - [2.8. View `Markdown` files in `VS Code` (LOCAL)](#28-view-markdown-files-in-vs-code-local)
 
 ## 1. Required steps
 
@@ -104,13 +104,13 @@
 
 1. [Fork the course instructors' repo](../../wiki/github.md#fork-a-repo).
 
-   The course instructors' repo [URL](../../wiki/computer-networks.md#url) is <https://github.com/inno-se-toolkit/se-toolkit-lab-5>.
+   The course instructors' repo [URL](../../wiki/computer-networks.md#url) is <https://github.com/inno-se-toolkit/se-toolkit-lab-6>.
 
 #### 1.3.3. (UPD) Go to your fork
 
 1. [Go to your fork](../../wiki/github.md#go-to-your-fork).
 
-   The [URL](../../wiki/computer-networks.md#url) of your fork should look like `https://github.com/<your-github-username>/se-toolkit-lab-5`.
+   The [URL](../../wiki/computer-networks.md#url) of your fork should look like `https://github.com/<your-github-username>/se-toolkit-lab-6`.
 
 #### 1.3.4. (UPD) Enable issues
 
@@ -182,7 +182,7 @@
 1. [Go to your fork](#133-upd-go-to-your-fork).
 2. Copy [`<your-fork-url>`](../../wiki/github.md#your-fork-url).
 
-   It should look like `https://github.com/<your-github-username>/se-toolkit-lab-5`.
+   It should look like `https://github.com/<your-github-username>/se-toolkit-lab-6`.
 
    See [`<your-github-username>`](../../wiki/github.md#your-github-username).
 
@@ -204,17 +204,15 @@
 2. [Check the current shell in the `VS Code Terminal`](../../wiki/vs-code.md#check-the-current-shell-in-the-vs-code-terminal).
 3. [Install the recommended `VS Code` extensions](../../wiki/vs-code.md#install-the-recommended-vs-code-extensions).
 
-<details><summary><b>Troubleshooting (click to open)</b></summary>
-
-<h4>The terminal shell is not <code>bash</code> or <code>zsh</code></h4>
-
-Go back to [step 1.4.3](#143-upd-windows-only-switch-to-the-linux-shell-for-the-vs-code-terminal) and set the default shell.
-
-<h4>Recommended extensions did not install</h4>
-
-Reload the `VS Code` window: press `Ctrl+Shift+P`, type `Reload Window`, and press `Enter`.
-
-</details>
+> <h3>Troubleshooting</h3>
+>
+> **The terminal shell is not `bash` or `zsh`.**
+>
+> Go back to [step 1.4.3](#143-upd-windows-only-switch-to-the-linux-shell-for-the-vs-code-terminal) and set the default shell.
+>
+> **Recommended extensions did not install.**
+>
+> Reload the `VS Code` window: press `Ctrl+Shift+P`, type `Reload Window`, and press `Enter`.
 
 ### 1.8. Continue creating a VM
 
@@ -268,9 +266,9 @@ If you can't [connect to your VM](../../wiki/vm.md#connect-to-the-vm), complete 
 
 [Set up the `Qwen Code`](../../wiki/qwen.md#set-up-the-qwen-code-local-machine).
 
-### 1.12. (UPD) Set up the `Qwen` API (VM)
+### 1.12. (UPD) Set up the `Qwen Code` API (VM)
 
-[Set up the `Qwen` API on your VM](../../wiki/qwen.md#set-up-the-qwen-code-api-remote-machine).
+[Set up the `Qwen Code` API on your VM](../../wiki/qwen.md#set-up-the-qwen-code-api-remote).
 
 ### 1.13. Set up the `Autochecker` bot (`Telegram`)
 
@@ -289,12 +287,12 @@ These enhancements can make your life easier:
 <!-- no toc -->
 - [Set up `Nix`](#21-upd-set-up-nix-local)
 - [Set up `direnv`](#22-upd-set-up-direnv-local)
-- [Learn to go back after clicking a link](#23-learn-to-go-back-after-clicking-a-link)
-- [Set up the shell prompt](#24-set-up-the-shell-prompt)
-- [Customize the `Source Control`](#25-customize-the-source-control)
-- [Get familiar with `GitLens`](#26-get-familiar-with-gitlens)
-- [Create a label for tasks](#27-create-a-label-for-tasks)
-- [View `Markdown` files in `VS Code`](#28-view-markdown-files-in-vs-code)
+- [Learn to go back after clicking a link](#23-learn-to-go-back-after-clicking-a-link-local)
+- [Set up the shell prompt](#24-set-up-the-shell-prompt-local)
+- [Customize the `Source Control`](#25-customize-the-source-control-local)
+- [Get familiar with `GitLens`](#26-get-familiar-with-gitlens-local)
+- [Create a label for tasks](#27-create-a-label-for-tasks-github)
+- [View `Markdown` files in `VS Code`](#28-view-markdown-files-in-vs-code-local)
 
 ### 2.1. (UPD) Set up `Nix` (LOCAL)
 
@@ -307,7 +305,7 @@ These enhancements can make your life easier:
 2. [Set up `Nix`](#21-upd-set-up-nix-local).
 3. [Set up `direnv`](../../wiki/direnv.md#set-up-direnv).
 
-### 2.3. Learn to go back after clicking a link
+### 2.3. Learn to go back after clicking a link (LOCAL)
 
 > [!NOTE]
 > Shortcuts for going back after clicking a link:
@@ -316,7 +314,7 @@ These enhancements can make your life easier:
 - `Firefox` — `Alt+ArrowLeft`.
 - Other browsers — google.
 
-### 2.4. Set up the shell prompt
+### 2.4. Set up the shell prompt (LOCAL)
 
 `Starship` shows your current `Git` branch, status, and other useful info directly in your [shell prompt](../../wiki/shell.md#shell-prompt) in almost any terminal, including the [`VS Code Terminal`](../../wiki/vs-code.md#vs-code-terminal).
 
@@ -329,7 +327,7 @@ Complete these steps:
 
    <img alt="Starship in the VS Code Terminal" src="../../wiki/images/starship/terminal-prompt.png" style="width:400px"></img>
 
-### 2.5. Customize the `Source Control`
+### 2.5. Customize the `Source Control` (LOCAL)
 
 1. [Open the `Source Control`](../../wiki/vs-code.md#open-the-source-control).
 2. Click three dots to the right of `SOURCE CONTROL`.
@@ -337,7 +335,7 @@ Complete these steps:
 
    <img alt="Changes and GitLens" src="../../wiki/images/vs-code/source-control-allowed-views.png" style="width:400px"></img>
 
-### 2.6. Get familiar with `GitLens`
+### 2.6. Get familiar with `GitLens` (LOCAL)
 
 [`GitLens`](../../wiki/gitlens.md#what-is-gitlens) helps you work with `Git` in `VS Code`.
 
@@ -348,7 +346,7 @@ Complete these steps:
 3. [Inspect the current branch](../../wiki/gitlens.md#inspect-the-current-branch).
 4. [Inspect the remotes](../../wiki/gitlens.md#inspect-the-remotes).
 
-### 2.7. Create a label for tasks
+### 2.7. Create a label for tasks (`GitHub`)
 
 [Labels](../../wiki/github.md#label) help you filter and organize issues.
 
@@ -363,11 +361,11 @@ Complete these steps:
 2. [Add the label to issues](../../wiki/github.md#add-a-label-to-issues).
 3. [See all issues with the label](../../wiki/github.md#see-all-issues-with-a-label).
 
-### 2.8. View `Markdown` files in `VS Code`
+### 2.8. View `Markdown` files in `VS Code` (LOCAL)
 
 If you want to view [`README.md`](../../README.md) and other `Markdown` files in `VS Code` instead of on `GitHub`:
 
 1. [Install the recommended `VS Code` extensions](../../wiki/vs-code.md#install-the-recommended-vs-code-extensions).
-2. [Open the file](../../wiki/vs-code.md#open-the-file):
-   [`README.md`](../../README.md).
+2. [Open a `Markdown` file](../../wiki/vs-code.md#open-the-file),
+   e.g. [`README.md`](../../README.md).
 3. [Open the `Markdown` preview](../../wiki/vs-code.md#open-the-markdown-preview).

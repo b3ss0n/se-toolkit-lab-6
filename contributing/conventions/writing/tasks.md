@@ -481,13 +481,12 @@ Bad:
 
 ### 4.19. Recovery guidance
 
-Steps that involve infrastructure or environment-dependent operations (`Docker`, databases, services on ports) can fail for reasons outside the task's scope — port conflicts, stale containers, missing environment variables. Instead of directing students to "ask the TA," include a collapsible troubleshooting block so students can self-diagnose common failures.
+Steps that involve infrastructure or environment-dependent operations (`Docker`, databases, services on ports) can fail for reasons outside the task's scope — port conflicts, stale containers, missing environment variables. Instead of directing students to "ask the TA," include a troubleshooting block so students can self-diagnose common failures.
 
 Key rules:
 
 - **Place after the checkpoint.** The troubleshooting block follows the "You should see…" checkpoint, because students only need it when the checkpoint fails.
-- **Use the summary `<b>Troubleshooting (click to open)</b>`.** Bold text makes the block easy to spot in long pages. The parenthetical tells students the block is interactive.
-- **Use `<h4>` for each symptom.** Start each entry with an `<h4>` tag containing the symptom (what the student sees), then the fix. `<h4>` renders as a visible heading but stays out of the auto-generated ToC — the same pattern used for Time, Purpose, and Context in the task template. Never use markdown headings (`####`) inside a troubleshooting block.
+- **Use a bold sentence for each symptom.** Start each entry with a bold sentence containing the symptom (what the student sees), then the fix. See [Troubleshooting sections](../writing/common.md#427-troubleshooting-sections) for the format.
 - **Keep it brief.** Cover only the 2–3 most common failures per block. Rare edge cases can still go to the TA.
 - **Link to wiki instead of duplicating.** When a fix involves a reusable tool operation (e.g., stopping a process, restarting a service), link to the relevant wiki section rather than re-explaining the steps inline.
 - **Only add to infrastructure steps.** Steps involving external systems or environment-dependent operations where common failures are predictable. Simple file edits or `Git` commands don't need troubleshooting blocks.
@@ -499,23 +498,21 @@ Good:
 
    You should see all containers running.
 
-   <details><summary><b>Troubleshooting (click to open)</b></summary>
-
-   <h4>Port conflict (<code>port is already allocated</code>)</h4>
-
-   Stop the process that uses the port, then retry.
-
-   <h4>Containers exit immediately</h4>
-
-   To rebuild all containers from scratch,
-
-   [run in the `VS Code Terminal`](...):
-
-   ```terminal
-   docker compose down && docker compose up --build
-   ```
-
-   </details>
+   > <h3>Troubleshooting</h3>
+   >
+   > **Port conflict (`port is already allocated`).**
+   >
+   > Stop the process that uses the port, then retry.
+   >
+   > **Containers exit immediately.**
+   >
+   > To rebuild all containers from scratch,
+   >
+   > [run in the `VS Code Terminal`](...):
+   >
+   > ```terminal
+   > docker compose down && docker compose up --build
+   > ```
 ~~~
 
 Bad:

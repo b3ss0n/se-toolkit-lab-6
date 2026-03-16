@@ -63,19 +63,6 @@ def is_safe_path(path: str) -> bool:
     return abs_path.startswith(str(PROJECT_ROOT))
 
 
-def is_safe_api_path(path: str) -> bool:
-    """
-    Check if an API path is safe (no path traversal).
-    """
-    # Reject paths with ..
-    if ".." in path:
-        return False
-    # Path should start with /
-    if not path.startswith("/"):
-        return False
-    return True
-
-
 def tool_read_file(path: str) -> str:
     """
     Read the contents of a file from the project repository.
@@ -147,19 +134,19 @@ def tool_query_api(
     Args:
         method: HTTP method (GET, POST, PUT, DELETE, PATCH)
         path: API endpoint path (e.g., /items/)
-        body: Optional JSON request body for POST/PUT
+        body: Optional JSON request body for POST/PUT/PATCH
         api_base_url: Base URL of the API
         lms_api_key: API key for authentication
 
     Returns:
         JSON string with status_code and body
     """
-    # Security check
-    if not is_safe_api_path(path):
+    # Security check - reject paths with traversal
+    if ".." in path or not path.startswith("/"):
         return json.dumps(
             {
                 "status_code": 400,
-                "body": {"error": f"Invalid path: {path}. Path traversal not allowed."},
+                "body": {"error": f"Invalid path: {path}. Path must start with / and no .."},
             }
         )
 
@@ -237,18 +224,19 @@ def tool_query_api(
 TOOLS = {
     "read_file": tool_read_file,
     "list_files": tool_list_files,
+    "query_api": tool_query_api,
 }
 
 
 def get_gemini_tool_schema(api_base_url: str, lms_api_key: str) -> list[dict]:
     """Get tool schema for Google Gemini API."""
-
+    
     # Create query_api tool with closure for API credentials
     def query_api_wrapper(method: str, path: str, body: str = None) -> str:
         return tool_query_api(method, path, body, api_base_url, lms_api_key)
-
+    
     TOOLS["query_api"] = query_api_wrapper
-
+    
     return [
         {
             "functionDeclarations": [
@@ -309,13 +297,13 @@ def get_gemini_tool_schema(api_base_url: str, lms_api_key: str) -> list[dict]:
 
 def get_openai_tool_schema(api_base_url: str, lms_api_key: str) -> list[dict]:
     """Get tool schema for OpenAI-compatible APIs."""
-
+    
     # Create query_api tool with closure for API credentials
     def query_api_wrapper(method: str, path: str, body: str = None) -> str:
         return tool_query_api(method, path, body, api_base_url, lms_api_key)
-
+    
     TOOLS["query_api"] = query_api_wrapper
-
+    
     return [
         {
             "type": "function",
@@ -379,168 +367,9 @@ def get_openai_tool_schema(api_base_url: str, lms_api_key: str) -> list[dict]:
     ]
 
 
-def call_llm_openai_with_tools(
-    question: str,
-    api_key: str,
-    model: str,
-    tool_calls_log: list[dict],
-    api_base_url: str,
-    lms_api_key: str,
-    api_base: str,
-) -> tuple[str | None, list[dict] | None, str | None]:
-    """
-    Call OpenAI-compatible API with tool support.
-
-    Returns:
-        Tuple of (answer, tool_calls, error)
-        - If tool_calls: answer is None, tool_calls is list of tool calls to execute
-        - If final answer: answer is the response, tool_calls is None
-    """
-    # Normalize base URL (remove /v1 suffix if present for chat endpoint)
-    base_url = api_base.rstrip("/")
-    if base_url.endswith("/v1"):
-        chat_url = f"{base_url}/chat/completions"
-    else:
-        chat_url = f"{base_url}/chat/completions"
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-    }
-
-    # Build system instruction
-    system_instruction = """You are a documentation and system assistant with access to three tools:
-- list_files: List files in a directory
-- read_file: Read the contents of a file
-- query_api: Call the backend LMS API
-
-When answering questions:
-1. For wiki/documentation questions → use list_files and read_file
-2. For system facts (framework, ports, status codes) → use read_file on source code or pyproject.toml
-3. For data queries (item count, scores, analytics) → use query_api
-4. For bug diagnosis → use query_api to reproduce the error, then read_file to find the buggy code
-5. For bug questions about analytics → read analytics.py and look for: division operations (risk of division by zero), sorting with None values, missing null checks
-6. For comparing error handling → read both files (etl.py and routers/) and compare try/except patterns, error logging, and recovery strategies
-
-Always include the source when you find information in files.
-For API queries, describe the endpoint and response.
-Think step by step and use tools iteratively until you have enough information.
-Be precise and include specific details like line numbers, function names, and exact error messages."""
-
-    # Build messages
-    messages = [{"role": "system", "content": system_instruction}]
-
-    # Add user question and previous tool results
-    if tool_calls_log:
-        # Add original question
-        messages.append({"role": "user", "content": question})
-        # Add tool results as assistant/tool messages
-        for tc in tool_calls_log:
-            messages.append(
-                {
-                    "role": "assistant",
-                    "content": None,
-                    "tool_calls": [
-                        {
-                            "id": f"call_{tc['tool']}",
-                            "type": "function",
-                            "function": {
-                                "name": tc["tool"],
-                                "arguments": json.dumps(tc["args"]),
-                            },
-                        }
-                    ],
-                }
-            )
-            messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": f"call_{tc['tool']}",
-                    "content": tc["result"],
-                }
-            )
-    else:
-        messages.append({"role": "user", "content": question})
-
-    payload = {
-        "model": model,
-        "messages": messages,
-        "tools": get_openai_tool_schema(api_base_url, lms_api_key),
-        "tool_choice": "auto",
-        "temperature": 0.7,
-        "max_tokens": 1500,
-    }
-
-    print(f"Calling OpenAI-compatible API with tools: {chat_url}...", file=sys.stderr)
-
-    try:
-        with httpx.Client(timeout=60.0) as client:
-            response = client.post(chat_url, headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-
-            choices = data.get("choices", [])
-            if not choices:
-                return "No answer found", None, None
-
-            message = choices[0].get("message", {})
-
-            # Check for tool calls
-            tool_calls = message.get("tool_calls")
-            if tool_calls:
-                results = []
-                for tc in tool_calls:
-                    func = tc.get("function", {})
-                    tool_name = func.get("name")
-                    args_str = func.get("arguments", "{}")
-
-                    try:
-                        args = json.loads(args_str)
-                    except json.JSONDecodeError:
-                        args = {}
-
-                    print(f"LLM wants to call tool: {tool_name}", file=sys.stderr)
-
-                    # Execute the tool
-                    if tool_name in TOOLS:
-                        result = TOOLS[tool_name](**args)
-                        results.append(
-                            {"tool": tool_name, "args": args, "result": result}
-                        )
-                    else:
-                        results.append(
-                            {
-                                "tool": tool_name,
-                                "args": args,
-                                "result": f"Error: Unknown tool '{tool_name}'",
-                            }
-                        )
-
-                return None, results, None
-
-            # No tool calls - final answer
-            content = message.get("content") or ""
-            return content, None, None
-
-    except httpx.HTTPStatusError as e:
-        print(f"HTTP error: {e}", file=sys.stderr)
-        print(f"Response: {e.response.text}", file=sys.stderr)
-        return None, None, f"HTTP error: {e}"
-    except httpx.RequestError as e:
-        print(f"Request error: {e}", file=sys.stderr)
-        return None, None, f"Request error: {e}"
-    except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
-        return None, None, f"Unexpected error: {e}"
-
-
 def call_llm_gemini_with_tools(
-    question: str,
-    api_key: str,
-    model: str,
-    tool_calls_log: list[dict],
-    api_base_url: str,
-    lms_api_key: str,
+    question: str, api_key: str, model: str, tool_calls_log: list[dict],
+    api_base_url: str, lms_api_key: str
 ) -> tuple[str | None, list[dict] | None, str | None]:
     """
     Call Google Gemini API with tool support.
@@ -566,13 +395,11 @@ When answering questions:
 2. For system facts (framework, ports, status codes) → use read_file on source code or pyproject.toml
 3. For data queries (item count, scores, analytics) → use query_api
 4. For bug diagnosis → use query_api to reproduce the error, then read_file to find the buggy code
-5. For bug questions about analytics → read analytics.py and look for: division operations (risk of division by zero), sorting with None values, missing null checks
-6. For comparing error handling → read both files (etl.py and routers/) and compare try/except patterns, error logging, and recovery strategies
+5. For analytics bugs → look for division operations (division by zero risk) and sorting with None values
 
 Always include the source when you find information in files.
 For API queries, describe the endpoint and response.
-Think step by step and use tools iteratively until you have enough information.
-Be precise and include specific details like line numbers, function names, and exact error messages."""
+Think step by step and use tools iteratively until you have enough information."""
 
     # Build conversation history
     contents = []
@@ -600,7 +427,7 @@ Be precise and include specific details like line numbers, function names, and e
         "tools": get_gemini_tool_schema(api_base_url, lms_api_key),
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 1500,
+            "maxOutputTokens": 1000,
         },
     }
 
@@ -649,7 +476,7 @@ Be precise and include specific details like line numbers, function names, and e
                             )
 
                 # No function calls - this is the final answer
-                if parts and "text" in parts[0]:
+                if "text" in parts[0]:
                     answer = parts[0]["text"]
                     return answer, None, None
 
@@ -688,23 +515,13 @@ def extract_source_from_tool_calls(tool_calls: list[dict]) -> str:
 
             return f"{path}{section}"
 
-    # For API calls, return API endpoint
-    for call in reversed(tool_calls):
-        if call["tool"] == "query_api":
-            path = call["args"].get("path", "")
-            return f"API: {path}"
-
     # Default to wiki directory if no read_file found
     return "wiki"
 
 
 def run_agentic_loop(
-    question: str,
-    api_key: str,
-    model: str,
-    api_base_url: str,
-    lms_api_key: str,
-    api_base: str,
+    question: str, api_key: str, model: str,
+    api_base_url: str, lms_api_key: str
 ) -> dict:
     """
     Run the agentic loop: call LLM, execute tools, repeat until answer.
@@ -718,27 +535,13 @@ def run_agentic_loop(
 
     print(f"Starting agentic loop for question: {question}", file=sys.stderr)
 
-    # Determine which API to use
-    use_gemini = "googleapis.com" in api_base
-
     for iteration in range(max_iterations):
         print(f"\n--- Iteration {iteration + 1} ---", file=sys.stderr)
 
         # Call LLM with tools
-        if use_gemini:
-            result_answer, tool_calls, error = call_llm_gemini_with_tools(
-                question, api_key, model, tool_calls_log, api_base_url, lms_api_key
-            )
-        else:
-            result_answer, tool_calls, error = call_llm_openai_with_tools(
-                question,
-                api_key,
-                model,
-                tool_calls_log,
-                api_base_url,
-                lms_api_key,
-                api_base,
-            )
+        result_answer, tool_calls, error = call_llm_gemini_with_tools(
+            question, api_key, model, tool_calls_log, api_base_url, lms_api_key
+        )
 
         if error:
             print(f"Error: {error}", file=sys.stderr)
@@ -797,10 +600,19 @@ def main() -> None:
     print(f"Project root: {PROJECT_ROOT}", file=sys.stderr)
     print(f"API Base URL: {agent_api_base_url}", file=sys.stderr)
 
-    # Run agentic loop (supports both Gemini and OpenAI-compatible APIs)
-    result = run_agentic_loop(
-        question, api_key, model, agent_api_base_url, lms_api_key, api_base
-    )
+    # Run agentic loop (Gemini only for now)
+    if "googleapis.com" in api_base:
+        result = run_agentic_loop(
+            question, api_key, model, agent_api_base_url, lms_api_key
+        )
+    else:
+        # Fallback to simple LLM call without tools
+        print("Warning: Tools only supported for Google Gemini API", file=sys.stderr)
+        result = {
+            "answer": "Tools only supported for Google Gemini API",
+            "source": "",
+            "tool_calls": [],
+        }
 
     # Output valid JSON to stdout
     print(json.dumps(result))

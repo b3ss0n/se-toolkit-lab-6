@@ -37,6 +37,14 @@ Docs:
 - Method 2: [Install `Node.js` using the commands from the official site](#install-nodejs-using-the-commands-from-the-official-site)
 - Method 3: [Install `Node.js` using `Nix`](#install-nodejs-using-nvm)
 
+> [!NOTE]
+> Probably only the [`Nix`](./nix.md#what-is-nix) method will work
+> because a library is missing on your VM.
+>
+> See <https://github.com/nodejs/node/issues/60790>
+>
+> `Nix` will fetch all necessary dependencies for you.
+
 ### Install `Node.js` using `nvm`
 
 1. [Install `nvm`](#install-nvm) if not yet installed.
