@@ -9,3 +9,4 @@ The primary addition to this architecture is the `query_api` tool. This tool bri
 Developing this agent emphasized the necessity of strict error handling within tool functions. If the `query_api` tool simply crashes on a 404 or 500 error, the LLM loses its operational context. By returning the raw status code and error text as a string, the LLM can interpret the failure and potentially retry with a corrected payload.
 
 Furthermore, I learned that LLMs require highly explicit system prompts for specialized tasks like code review. Initially, the agent failed to identify logical bugs in `analytics.py`. By updating the system prompt to explicitly command the agent to look for "division by zero" risks and "sorting lists with None values," its accuracy on the evaluation dataset increased drastically. This proved that prompt engineering is just as critical to the system's architecture as the Python code itself.
+
